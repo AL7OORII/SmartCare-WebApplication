@@ -1,0 +1,256 @@
+{% extends 'newapp/layout.html' %}
+{% load static %}
+{% block title %} Nurse Dashboard {% endblock title %}
+{% block style %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            margin-top: 20px; /* set this to auto fit screen */
+            background-color: #bdbac0; 
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            padding: 20px;
+        }
+
+        .flex-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-item {
+            padding: 20px;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px; /* Added */
+            height: 300px;
+            width: 50%;
+            margin-right: 30px;
+            overflow-y: scroll;
+        }
+        .dashboard-item h2 {
+            color: #333;
+        }
+
+        .patient-item,
+        .prescription-item {
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        .logout-button {
+            background-color: #dc3545;
+            color: #fff;
+            padding: 5px 10px; 
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 0px;
+            display: inline-block;
+            height: 22px;
+        }
+        .home-icon {
+            width: 40px;
+            height: 40px;
+        }
+
+   
+
+        .font-small {
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+    </style>
+{% endblock style %}
+{% block content %}
+<div class="container">
+    <div class="flex-container">
+        <a href="{% url 'main_page' %}"><img src= "{%static 'Homeicon.png' %}" alt="Home" class="home-icon"></a>
+        <span><i class="bx bx-lock"></i></span>
+        <h3>Welcome, Nurse {{user.first_name}}!</h3>
+    </div>
+    <hr>
+    {% if messages %}
+        {% for message in messages %}
+        <div class="hidden message d-none">
+            {{message}}
+        </div>
+        {% endfor %}
+        <div id="flash-message-container"></div>
+    {% endif %}
+    <div class="flex-container">
+        <div class="dashboard-item patient-list">
+            <h2>Patients Timetable</h2>
+            <hr>
+            <div class="patient-list">
+                {% if patients %}
+                    {% for patient in patients %}
+                    <div class="d-flex justify-content-between">
+                        <div>Name: </div>
+                        <div class="patient-item">
+                            {{patient.user.user.first_name}} {{patient.user.user.last_name}}
+                        </div>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                {% else %}
+                    No patient today
+                {% endif %}
+            </div>
+        </div>
+        <div class="dashboard-item">
+            <h2>Appointments</h2>
+            <hr>
+            <div class="appointments">
+                {% for appointment in appointments %}
+                <div class="font-small">
+                    <div class="d-flex justify-content-between">
+                        <div class="text-start">
+                            <div>
+                                Name:  
+                            </div><div>
+                                Date:  
+                            </div>
+                            <div>
+                                Time:  
+                            </div>
+                            <div>
+                                Notes:  
+                            </div>
+                            
+                            {% if appointment.patient.user.is_forwarded_to_specialist %}
+                                <div>
+                                    Forwarded:  
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="text-end">
+                            <div>
+                                {% if appointment.patient.user.gender == "Male" %}
+                                    Mr {{appointment.patient.user.user.first_name}}
+                                {% else %}
+                                    Ms {{appointment.patient.user.user.first_name}}
+                                {% endif %}
+                            </div>
+                            <div class="appointment-item">
+                                {{appointment.date}}
+                            </div>
+                            <div>
+                                {{appointment.start_time}} 
+                                {% if appointment.end_time %}
+                                    - {{appointment.end_time}}
+                                {% endif %}
+                            </div>
+                            <div>
+                                {{appointment.notes}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hide d-none" id="hide">
+                        {{appointment.id}}
+                    </div>
+                    {% if appointment.is_cared_for %}
+                        <div class="">
+                            <a class="btn btn-success generateInvoice mt-2" href="{% url 'generate_invoice'  %}">Generate Invoice</a>
+                        </div>
+
+                    {% elif appointment.is_cared_for and appointment.is_generated_invoice %}
+                        <div class="">
+                            <a class="btn btn-outline-info mt-2" href="{% url 'generate_invoice'  %}">View Invoice</a>
+                        </div>
+                    {% else %}
+                        <div class="prescription-link">
+                            <a class="btn btn-success mt-2" href="{% url 'patient_appointment' appointment_id=appointment.id %}">View Appointment</a>
+                        </div>
+                    {% endif %}
+                </div>
+                <hr>
+                {% endfor %}  
+            </div>
+            
+        </div>
+    </div>
+    <hr>
+    <div>
+        <a href="{% url 'logged_out' %}" class="btn btn-danger">Logout</a>
+    </div>
+</div>
+{% endblock content %}
+
+{% block js %}
+<script>
+    $(document).ready(function() {
+        message =  $('.message').text()
+        console.log(message)
+        var alertHtml = '<div class="alert alert-success alert-dismissible fade show mt-3 d-flex justify-content-between" role="alert">' +
+                        message +
+                        '<button type="button" class="close bg-danger text-white border-none" data-dismiss="alert" aria-label="Close">' +
+                        '<span aria-hidden="true">&times;</span>' +
+                        '</button>' +
+                        '</div>';
+        $('#flash-message-container').html(alertHtml);
+        
+        // Set timeout to hide the flash message after 5 seconds
+        setTimeout(function() {
+            $('.alert').alert('close');
+        }, 5000);
+
+
+        $('.generateInvoice').click(function(e) {
+            e.preventDefault();
+            var appointmentId = $('#hide').text()
+    
+            appointmentId = parseInt(appointmentId); // Check the application ID in the console
+            // Send AJAX request to generate invoice
+            $.ajax({
+                url: `/generate-invoice/?appointmentId=${appointmentId}`,
+                type: 'GET',
+                success: function(data) {
+                    // Handle success response
+                    console.log(data); // Log the invoice data to console (for testing)
+                    window.location.href = data.redirect_url
+                    // Process the generated invoice data as needed (e.g., display in a modal)
+                },
+                error: function(xhr, status, error) {
+                    // Handle error
+                    console.error(error);
+                }
+            });
+        });
+
+        $('.generateInvoice').click(function(e) {
+            e.preventDefault();
+            var appointmentId = $('#hide').text()
+    
+            appointmentId = parseInt(appointmentId); // Check the application ID in the console
+            // Send AJAX request to generate invoice
+            $.ajax({
+                url: `/generate-invoice/?appointmentId=${appointmentId}`,
+                type: 'GET',
+                success: function(data) {
+                    // Handle success response
+                    console.log(data); // Log the invoice data to console (for testing)
+                    window.location.href = data.redirect_url
+                    // Process the generated invoice data as needed (e.g., display in a modal)
+                },
+                error: function(xhr, status, error) {
+                    // Handle error
+                    console.error(error);
+                }
+            });
+        });
+    });
+</script>
+{% endblock js %}

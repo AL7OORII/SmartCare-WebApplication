@@ -1,0 +1,52 @@
+services:
+  # "todo-app-api" service
+  smartcare-web:
+    # Name of the image to be built
+    image: smartcare-web
+    # Build the image from the Dockerfile in the current directory
+    build:
+      # Dockerfile is in the current directory
+      context: .
+      # Name of the Dockerfile
+      dockerfile: Dockerfile
+    # Restart policy
+    restart: unless-stopped
+    # Port mapping
+    # This means that the port 8000 of the host will be mapped to the port 8000 of the container.
+    ports:
+      - "8000:8000"
+    # Volume mapping
+    volumes:
+      - .:/app
+    # Service dependencies
+    depends_on:
+      - db
+    # Runtime command
+    # Please check the Docker Tutorial 1 for more details.
+    entrypoint: ["./newproj-entrypoint.sh"]
+
+  # "db" service
+  db:
+    # Name of the image to be pulled from Docker Hub.
+    image: postgres:latest
+    # Port mapping
+    # This means that the port 5432 of the host will be mapped to the port 5432 of the container.
+    ports:
+      - "5434:5432"
+    # Environment variables
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: smartcare
+    # Restart policy
+    restart: unless-stopped
+    # Volume mapping
+    # This means that the volume named "db_data" will be mapped to the directory "/var/lib/postgresql/data" of the container.
+    # The volume "db_data" will be created if it does not exist.
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+# Volumes
+volumes:
+  # "db_data" volume definition
+  db_data:

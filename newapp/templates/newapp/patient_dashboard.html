@@ -1,0 +1,132 @@
+{% extends 'newapp/layout.html' %}
+{% load static %}
+{% block title %}Create Appointment {% endblock %}
+{% block style %}
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<style>
+    a {
+        transition-property: color, transform;
+        transition-duration: 0.3s; /* Adjust as needed */
+        transition-timing-function: ease-in-out; /* Adjust as needed */
+    }
+
+    a:hover {
+        text-decoration: none;
+        color: white;
+        transform: scale(1.1);
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <a href="{% url 'main_page' %}">
+            <img src= "{%static 'Homeicon.png' %}" alt="Home" class="home-icon"></a>
+        </a>
+        <span><i class="bx bx-lock"></i></span>
+        Welcome to your dashboard, {{ first_name }}
+    </div>
+    {% if messages %}
+        <div id="flash-message-container"></div>
+    {% endif %}
+    
+    <h4 class="mt-4">MY APPOINTMENTS</h4>
+    <div class="container vh-70 overflow-y-auto">
+        <div class="row">
+            {% if user.is_authenticated %}
+                {% if appointments %}
+                    {% for appointment in appointments %}
+                        <div class="col-sm-6 col-md-4 mt-4 cur-poi">
+                            <a href="{% url 'patient_appointment' appointment_id=appointment.id %}">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <p class="card-text">Nurse: {{ appointment.nurse }}</p>
+                                        <p class="card-text">Date: {{ appointment.date }}</p>
+                                        <p class="card-text">Start Time: {{ appointment.start_time }}</p>
+                                        {% if appointment.end_time %}
+                                            <p class="card-text">End Time: {{ appointment.end_time }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col">
+                        <p>No appointments yet.</p>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="col">
+                    <p>Please log in to view appointments.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <h4 class="mt-4">MY CONSULTATIONS</h4>
+    <div class="container vh-70 overflow-y-auto">
+        <div class="row">
+            {% if user.is_authenticated %}
+                {% if consultations %}
+                    {% for consultation in consultations %}
+                        <div class="col-sm-6 col-md-4 mt-4 cur-poi">
+                            <a href="{% url 'patient_consultation' consultation_id=consultation.id %}">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <p class="card-text">Doctor: {{ consultation.doctor }}</p>
+                                        <p class="card-text">Date: {{ consultation.date }}</p>
+                                        <p class="card-text">Start Time: {{ consultation.start_time }}</p>
+                                        {% if consultation.end_time %}
+                                            <p class="card-text">End Time: {{ consultation.end_time }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col">
+                        <p>No consultations yet.</p>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="col">
+                    <p>Please log in to view appointments and consultations.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class=flex>
+        <a href="{% url 'logged_out' %}" class="logout-button">Logout</a>
+        <a href="{% url 'create_appointment' %}" class="appointment-button">Make an appointment with a nurse</a>
+        <a href="{% url 'make_consultation' %}" class="btn btn-info mt-4">Consult a Doctor</a>
+    </div>
+    {% for item in messages %}
+        <div class="hidden message d-none">
+            {{item}}
+        </div>
+    {% endfor %}
+</div>
+{% endblock content %}
+{% block js %}
+<script>
+    $(document).ready(function() {
+        message =  $('.message').text()
+        console.log(message)
+        var alertHtml = '<div class="alert alert-success alert-dismissible fade show mt-3" role="alert">' +
+                        message +
+                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                        '<span aria-hidden="true">&times;</span>' +
+                        '</button>' +
+                        '</div>';
+        $('#flash-message-container').html(alertHtml);
+        
+        // Set timeout to hide the flash message after 5 seconds
+        setTimeout(function() {
+            $('.alert').alert('close');
+        }, 5000);
+    });
+</script>
+
+{% endblock %}

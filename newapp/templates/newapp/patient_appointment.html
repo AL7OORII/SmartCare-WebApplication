@@ -1,0 +1,613 @@
+{% extends 'newapp/layout.html' %}
+{% load static %}
+{% block title %}{{appointment.patient.user.user.first_name}} Appointment - {{appointment.id}} {% endblock %}
+{% block style %} 
+<style>
+    .custom-modal {
+        color: white;
+        width: 60%;
+        height: 70%;
+        margin: auto;
+        padding: 40px;
+        margin-top: 30px;
+        z-index: 88;
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <a href="{% url 'main_page' %}">
+            <img src= "{%static 'Homeicon.png' %}" alt="Home" class="home-icon"></a>
+        </a>
+        <span><i class="bx bx-lock"></i></span>
+        {% if request.user.customuser.user_type == "Doctor" or request.user.customuser.user_type == "Nurse" %}
+            {% if appointment %}
+                Appointment - {{appointment.patient.user.user.first_name}}
+            {% elif consultation %}
+                Consultation - {{consultation.patient.user.user.first_name}}
+            {% endif %}
+        {% else %}
+            {% if appointment %}
+                Appointment - {{appointment.id}}
+            {% elif consultation %}
+                Consultation - {{consultation.id}}
+            {% else %}
+                
+            {% endif %}
+        {% endif %}
+    </div>
+    {% if messages %}
+        <div id="flash-message-container hide"></div>
+    {% endif %}
+    {% if appointment %}
+        <h3 class="text-center mt-4 mb-3">Appointment Details</h3>
+    {% else %}
+        <h3 class="text-center mt-4 mb-3">Consultation Details</h3>
+    {% endif %}
+    <hr>
+    <div class="d-flex justify-content-between mx-5 mb-4">
+        <div class="text-start">
+            <div>
+                {% if appointment %}
+                    Nurse
+                    <div class="d-none hide">{{appointment.id}}</div>
+                {% elif consultation %}
+                    Doctor
+                {% endif %}
+            </div>
+            <div>
+                Date
+            </div>
+            <div>
+                Start Time 
+            </div>
+            <div>
+                End Time 
+            </div>
+            <div>
+                Status
+            </div> 
+            <div>
+                Appointment Type
+            </div>
+            <div>
+                Notes
+            </div>
+        </div>
+        {% if appointment %}
+        <div class="text-end">
+            <div>
+                {{appointment.nurse}}
+            </div>
+            <div>
+                {{appointment.date}}
+            </div>
+            <div>{{appointment.start_time}}</div>
+            <div>{{appointment.end_time}}</div>
+            <div>{{appointment.status}}</div>
+            <div>{{appointment.appointment_type}}</div>
+            {% if appointment.notes %}
+                <div>{{appointment.notes}}</div>
+            {% else %}
+                -
+            {% endif %}
+        </div>
+        {% elif consultation %}
+        <div class="text-end">
+            <div>
+                {{consultation.doctor}}
+            </div>
+            <div>
+                {{consultation.date}}
+            </div>
+            <div>{{consultation.start_time}}</div>
+            <div>{{consultation.end_time}}</div>
+            <div>{{consultation.status}}</div>
+            <div>{{consultation.appointment_type}}</div>
+            {% if consultation.notes %}
+                <div>{{consultation.notes}}</div>
+            {% else %}
+                -
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    <hr>
+    {% if request.user.customuser.user_type == "Doctor"%}
+        <div class="d-flex flex-row justify-content-between">
+            <div>
+                <button class="btn btn-success give-description-btn" data-appointment-id="{{ consultation.id }}">Give Prescription</button>
+            </div>
+            <div>
+                <button class="btn btn-warning forward-appointment-btn" data-appointment-id="{{ consultation.id }}" data-toggle="modal" data-target="#consultationEndTimeModal">Forward to a specialist</button>
+            </div>
+        </div>
+    {% elif request.user.customuser.user_type == "Nurse"%}
+        <div>
+            <button class="btn btn-success give-care-btn" data-appointment-id="{{ appointment.id }}" data-toggle="modal" data-target="#endTimeModal">Give Care</button>
+        </div>
+    {% else %}
+        <div class="d-flex flex-row justify-content-between">
+            {% if appointment %}
+                {% if appointment.is_cared_for != True %}
+                    <div>
+                        <button class="btn btn-danger cancel-appointment-btn" data-appointment-id="{{ appointment.id }}">Cancel Appointment</button>
+                    </div>
+                {% else %}
+                    <div>
+                        <button class="btn btn-outline-info view-invoice-btn" data-appointment-id="{{ appointment.id }}">View Invoice</button>
+                    </div>
+                    <div id="appointment-id-input" class="d-none hide">
+                        {{appointment.id}}
+                    </div>
+                {% endif %}
+            {% elif consultation %}
+                    {% if not consultation.is_forwarded_to_specialist and not consultation.is_prescribed %}
+                        <div>
+                            <button class="btn btn-danger cancel-consultation-btn" data-appointment-id="{{ consultation.id }}">Cancel Consultation</button>
+                        </div>
+                    {% elif consultation.is_forwarded_to_specialist or consultation.is_prescribed %}
+                    <div>
+                        <button class="btn btn-outline-info" id="view-invoice-btn" data-appointment-id="{{ consultation.id }}">View Invoice</button>
+                    </div>
+                    <div id="consultation-id-input" class="d-none hide">
+                        {{consultation.id}}
+                    </div>
+                    <!-- View Prescription Button -->
+                    <div class="text-end mb-3">
+                        <button class="btn btn-info view-prescription-btn" data-toggle="modal" data-target="#prescriptionModal" data-prescription-id="{{ consultation.prescriptions.first.id }}">View Prescription</button>
+                    </div>
+
+                    <!-- Prescription Detail Modal -->
+                    <div class="modal fade" id="prescriptionModal" tabindex="-1" role="dialog" aria-labelledby="prescriptionModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="prescriptionModalLabel">Prescription Details</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-info reorder-prescription-btn" data-prescription-id="{{ prescription_id }}">Reorder Prescription</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+            {% endif %}
+           
+        </div>
+    {% endif %}
+
+    </div>
+    <!-- Prescription Modal -->
+    <div class="modal fade" id="prescriptionModal" tabindex="-1" role="dialog" aria-labelledby="prescriptionModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header d-flex justify-content-between">
+                    <h5 class="modal-title" id="prescriptionModalLabel">Prescription Form</h5>
+                    <button type="button" class="close bg-danger text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="prescriptionForm">
+                        <!-- Prescription form fields -->
+                        <div class="form-group mb-3">
+                            <label for="description">Description:</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="description">End Time:</label>
+                            <input type="time" name="endTime" id="endTime" required>
+                        </div>
+                        <button type="submit mb-2" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Appointment end time modal -->
+    <div class="modal fade" id="endTimeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between border-none">
+              <h5 class="modal-title" id="exampleModalLabel">Enter Appointment End Time</h5>
+              <button type="button" class="close btn btn-outline-danger" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form id="endTimeForm">
+                <div class="form-group">
+                  <label for="endTime">Appointment End Time:</label>
+                  <input required="" id="time" type="time" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-outline-primary mt-3">Submit</button>
+              </form>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <!-- Forward to a specialist Modal -->
+    <div class="modal fade" id="consultationEndTimeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between">
+              <h5 class="modal-title" id="exampleModalLabel">Enter Consultation End Time</h5>
+              <button type="button" class="close btn btn-outline-danger" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form id="endConsultationTimeForm">
+                <div class="form-group">
+                  <label for="consultationEndTime">Consultation End Time:</label>
+                  <input type="time" class="form-control" id="consultationEndTime" name="consultationEndTime" required>
+                </div>
+                <button type="submit" class="btn btn-outline-primary mt-3">Submit</button>
+              </form>
+            </div>
+          </div>
+        </div>
+    </div>
+    <div class="hide d-none" id="staffType">
+        {{request.user.customuser.user_type}}
+    </div>
+</div>
+{% endblock content %}
+{% block js %} 
+<script>
+    // JavaScript code to handle cancel appointment button click
+    $(document).ready(function() {
+        // Function to get CSRF token from cookies
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Check if the cookie name starts with csrftoken=
+                    if (cookie.substring(0, 10) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    
+        $('.cancel-appointment-btn').click(function() {
+            var appointmentId = $(this).data('appointment-id');
+            // Get CSRF token
+            var csrftoken = getCookie('csrftoken');
+            // Send AJAX request
+            $.ajax({
+                url: '/cancel-appointment/',  // URL to handle cancel appointment request
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken  // Include CSRF token in request headers
+                },
+                data: {
+                    'appointment_id': appointmentId  // Send appointment ID as data
+                },
+                success: function(response) {
+                    // Display flash message at bottom right corner
+                    window.location.href = '/patient/dashboard/';
+                },
+                error: function(xhr, errmsg, err) {
+                    // Handle error
+                    console.log(xhr.status + ": " + xhr.responseText);
+                }
+            });
+        });
+
+        $('.cancel-consultation-btn').click(function() {
+            var appointmentId = $(this).data('appointment-id');
+            // Get CSRF token
+            var csrftoken = getCookie('csrftoken');
+            // Send AJAX request
+            $.ajax({
+                url: '/cancel-consultation/',  // URL to handle cancel appointment request
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken  // Include CSRF token in request headers
+                },
+                data: {
+                    'consultation_id': appointmentId  // Send appointment ID as data
+                },
+                success: function(response) {
+                    // Display flash message at bottom right corner
+                    window.location.href = '/patient/dashboard/';
+                },
+                error: function(xhr, errmsg, err) {
+                    // Handle error
+                    console.log(xhr.status + ": " + xhr.responseText);
+                }
+            });
+        });
+
+        $('#endConsultationTimeForm').submit(function(event) {
+            event.preventDefault();  // Prevent default form submission
+            // Get the appointment ID from the button data attribute
+            var appointmentId = $('.forward-appointment-btn').data('appointment-id');
+            // Get the appointment end time from the form
+            var endTime = $('#consultationEndTime').val();
+            if (endTime) {  // Check if the end time is provided
+                // Get CSRF token
+                var csrftoken = getCookie('csrftoken');
+                // Send AJAX request
+                $.ajax({
+                    url: '/forward-appointment/',  // URL to handle forward appointment request
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken  // Include CSRF token in request headers
+                    },
+                    data: {
+                        'appointment_id': appointmentId,  // Send appointment ID as data
+                        'end_time': endTime  // Send appointment end time as data
+                    },
+                    success: function(response) {
+                        // Display flash message at bottom right corner
+                        window.location.href = '/doctor/dashboard/';
+                    },
+                    error: function(xhr, errmsg, err) {
+                        // Handle error
+                        console.log(xhr.status + ": " + xhr.responseText);
+                    }
+                });
+                // Close the modal after submission
+                $('#consultationEndTimeModal').modal('hide');
+            } else {
+                alert("Please enter the consultation end time.");
+            }
+        });
+        // Handle click event on the button
+        $('.give-description-btn').click(function() {
+            // Get the appointment ID from data attribute
+            var consultationId = $(this).data('appointment-id');
+            uri = '/doctor/dashboard/'+ consultationId + '/';
+            // Update form action attribute with the appointment ID
+            $('#prescriptionForm').attr('action', uri);
+            // Show the modal
+            $('#prescriptionModal').modal('show');
+        });
+    
+        // Handle form submission
+        $('#prescriptionForm').submit(function(e) {
+            e.preventDefault();
+            var formData = $(this).serializeArray();
+            var csrftoken = getCookie('csrftoken');
+            // Send JSON request to the server
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken  // Include CSRF token in request headers
+                },
+                data: JSON.stringify(formData),
+                contentType: 'application/json',
+                success: function(response) {
+                    // Handle success response
+                    console.log(response);
+                    // Close the modal
+                    $('#prescriptionModal').modal('hide');
+                    window.location.href = '/doctor/dashboard/';
+                },
+                error: function(xhr, status, error) {
+                    // Handle error
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+    
+        $('#endTimeForm').submit(function(event) {
+            event.preventDefault();  // Prevent default form submission
+            // Get the appointment ID from the button data attribute
+            var endTime = $('#time').val();
+            var appointmentId = $('.hide').text();
+            appointmentId = parseInt(appointmentId)
+            console.log(endTime, appointmentId)
+            if (endTime) {  // Check if the end time is provided
+                // Get CSRF token
+                var csrftoken = getCookie('csrftoken');
+                // Send AJAX request
+                $.ajax({
+                    url: '/give-care/',  // URL to handle forward appointment request
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken  // Include CSRF token in request headers
+                    },
+                    data: {
+                        'appointment_id': appointmentId,  // Send appointment ID as data
+                        'end_time': endTime  // Send appointment end time as data
+                    },
+                    success: function(response) {
+                        // Display flash message at bottom right corner
+                        console.log();
+                        window.location.href = '/nurse/dashboard/';
+                    },
+                    error: function(xhr, errmsg, err) {
+                        // Handle error
+                        console.log(xhr.status + ": " + xhr.responseText);
+                    }
+                });
+                // Close the modal after submission
+                $('#endTimeModal').modal('hide');
+            } else {
+                alert("Please enter the appointment end time.");
+            }
+        });
+        
+        // Assuming jQuery is included in your project
+
+    // Function to show modal
+    function showModal(content) {
+        // Add modal HTML to the body
+        $('body').append('<div class="modal">' + content + '</div>');
+        // Show the modal
+        $('.modal').fadeIn();
+    }
+
+    // AJAX request function
+    function fetchInvoiceData(id, type) {
+        data = {}
+        if (type == "appointment") {
+            data['appointment_id'] = id
+        }
+
+        else if (type == "consultation") {
+            data['consultation_id'] = id
+        }
+
+        $.ajax({
+            url: '/view-invoice/',
+            type: 'GET',
+            data: data,
+            success: function(response) {
+                if ('error' in response) {
+                    // If there is an error, display it in a modal
+                    showModal('<p>Error: ' + response.error + '</p>');
+                } else {
+                    invoice = 
+                    `<div class='custom-modal bg-primary'>
+                        <h1 class='text-center'>Invoice</h1>
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div>
+                                    Total Amount
+                                </div>
+                                <div>
+                                    Patient Status
+                                </div>
+                                <div>
+                                    Payment Status
+                                </div>
+                                <div>
+                                    Invoice Date
+                                </div>
+                            </div>
+                            <div class="">
+                                <div>
+                                    ${response.invoice.total_amount}
+                                </div>
+                                <div>
+                                    ${response.invoice.patient_status}
+                                </div>
+                                <div>
+                                    ${response.invoice.payment_status}
+                                </div>
+                                <div>
+                                    ${response.invoice.invoice_date}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `
+                    // If there's no error, display invoice data in a modal
+                    showModal(invoice);
+                }
+            },
+            error: function(xhr, status, error) {
+                showModal('<p>Error: ' + error + '</p>');
+            }
+        });
+    }
+
+    
+    $('.view-invoice-btn').click(function() {
+        var appointmentId = $('#appointment-id-input').text();
+        fetchInvoiceData(parseInt(appointmentId), "appointment");
+    });
+
+    $('#view-invoice-btn').click(function() {
+        var consultationId = $('#consultation-id-input').text();
+        fetchInvoiceData(parseInt(consultationId), "consultation");
+    });
+
+    // Function to close modal when clicking outside of it
+    $(document).on('click', '.modal', function(event) {
+        if ($(event.target).hasClass('modal')) {
+            $(this).fadeOut(function() {
+                $(this).remove();
+            });
+        }
+    });
+});
+
+//presecription js
+$(document).ready(function() {
+        // Function to get the prescription details and show them in a modal
+        function fetchAndShowPrescriptionDetails(prescriptionId) {
+            var baseUrl = "{% url 'prescription_details' 0 %}";
+            var url = baseUrl.replace('0', prescriptionId);
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    var details = response.prescriptionDetails;
+                    var modalBody = $('#prescriptionModal').find('.modal-body');
+                    modalBody.empty(); // Clear previous details
+                    // Append the fetched details to the modal body
+                    modalBody.append('<p><strong>Description:</strong> ' + details.description + '</p>');
+                    // Show the modal
+                    $('#prescriptionModal').modal('show');
+                },
+                error: function() {
+                    alert('Error fetching prescription details.');
+                }
+            });
+        }
+
+        // Event handler for the "View Prescription" button click
+        $('.view-prescription-btn').click(function() {
+            var prescriptionId = $(this).data('prescription-id');
+            fetchAndShowPrescriptionDetails(prescriptionId);
+        });
+
+        // Event handler for the "Reorder Prescription" button click
+        $('.reorder-prescription-btn').click(function() {
+            // Retrieve the prescription ID stored in the data-prescription-id attribute
+            var prescriptionId = $(this).data('prescription-id');
+
+            // Make sure prescriptionId is defined and not null
+            if (prescriptionId) {
+                // Proceed with AJAX request
+                $.ajax({
+                    url: '/reorder-prescription/' + prescriptionId + '/',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            alert('Prescription reordered successfully.');
+                            location.reload();
+                        } else {
+                            // Handle any server-side messages sent back in the response
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        // Handle any HTTP errors
+                        alert('Error reordering prescription. Status: ' + xhr.status);
+                    }
+                });
+            } else {
+                // Alert if prescriptionId is undefined or null
+                alert('Error: Prescription ID is undefined.');
+            }
+        });
+
+});
+
+
+</script>
+
+{% endblock js %}

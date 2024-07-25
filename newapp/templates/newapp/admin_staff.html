@@ -1,0 +1,54 @@
+{% extends 'newapp/layout.html' %}
+
+{% block content %}
+<div style="padding: 20px; background-color: white;">
+    <br><h2 style="text-align: center;">Staff Overview</h2> <br>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <a href="{% url 'staff_register' %}" class="btn btn-primary">Add a Doctor or a Nurse </a> 
+    </div>
+    <br> <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Appointments</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in staff %}
+                <tr>
+                    <td>{{ member.user.first_name }} {{ member.user.last_name }}</td>
+                    <td>{{ member.user.email }}</td>
+                    <td>{{ member.user_type }}</td>
+                    <td>
+                        <ul>
+                            {% if member.user_type == "Doctor" %}
+                                {% for appointment in member.doctor.appointments.all %}
+                                    <li>
+                                        {{ appointment.date|date:"Y-m-d" }} at {{ appointment.start_time|time:"H:i" }}
+                                        <a href="{% url 'delete_appointment' appointment.id %}" class="btn btn-danger btn-sm">Remove</a>
+                                    </li>
+                                {% empty %}
+                                    <li>No appointments</li>
+                                {% endfor %}
+                            {% elif member.user_type == "Nurse" %}
+                                {% for appointment in member.nurse.appointments.all %}
+                                    <li>
+                                        {{ appointment.date|date:"Y-m-d" }} at {{ appointment.start_time|time:"H:i" }}
+                                        <a href="{% url 'delete_appointment' appointment.id %}" class="btn btn-danger btn-sm">Remove</a>
+                                    </li>
+                                {% empty %}
+                                    <li>No appointments</li>
+                                {% endfor %}
+                            {% endif %}
+                        </ul>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

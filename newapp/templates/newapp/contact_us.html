@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'about_us.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'main_page.css' %}">
+    <title>Contact Us</title>
+    <style>
+        .icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-size: cover;
+            margin-right: 5px;
+        }
+        
+        .phone {
+            background-image: url("phone-icon.png");
+        }
+        
+        .email {
+            background-image: url("email-icon.png");
+        }
+        
+        .container {
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    
+    <nav class="navbar">
+        <button onclick="window.history.back()">Back</button>
+        <span style="margin-left: auto; color: red;">Disclaimer: All contact information is fake</span>
+    </nav>
+
+    <div class="container">
+        <h1>Contact Us</h1>
+        
+        <p>We value your feedback and strive to provide excellent customer service. If you have any questions, concerns, or suggestions, please don't hesitate to contact us.</p>
+        <p style="text-align: center;">
+            <span class="icon phone"></span>
+            Phone: 01632 960360
+        </p>
+
+        <p style="text-align: center;">
+            <span class="icon email"></span>
+            Email: smartcare@customer.service.com
+        </p>
+        </p>
+        
+    </div>
+</body>
+</html>

@@ -1,0 +1,232 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Appointments page</title>
+</head>
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+
+header {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.dashboard-panel {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.dashboard-panel h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.table thead {
+    background-color: #007bff;
+    color: white;
+}
+
+.table thead th {
+    padding: 10px;
+    text-align: left;
+}
+
+.table tbody td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.btn {
+    padding: 10px 15px;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    margin-right: 5px;
+}
+
+.btn-primary {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Add some responsiveness */
+@media (max-width: 768px) {
+    .dashboard-panel {
+        padding: 10px;
+    }
+
+    .table thead th, .table tbody td {
+        padding: 5px;
+    }
+
+    .btn {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+}
+
+</style>
+<body>
+
+                <!-- Section: Appointment Management -->
+<section id="appointment-management" class="dashboard-panel">
+    <h2>Appointment Management</h2>
+    <button onclick="location.href='{% url 'admin_add_appointment' %}'" class="btn btn-primary">Add New Appointment</button>
+    <div>
+        <h3>Booking Management</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Doctor</th>
+                    <th>Patient</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                    <tr>
+                        <td>{{ appointment.doctor }}</td>
+                        <td>{{ appointment.patient }}</td>
+                        <td>{{ appointment.date }}</td>
+                        <td>{{ appointment.start_time|date:"h:i A" }}</td>
+                        <td>{{ appointment.status }}</td>
+                        <td>
+                            <button class="btn btn-secondary" onclick="openRescheduleModal({{ appointment.id }})">Reschedule</button>
+                            <!-- Modal for rescheduling -->
+                            <div id="rescheduleModal" style="display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 100;">
+                                <h3>Reschedule Appointment</h3>
+                                <form id="rescheduleForm">
+                                    <input type="hidden" id="appointmentId" name="appointmentId">
+                                    <label for="newDate">New Date:</label>
+                                    <input type="date" id="newDate" name="newDate" required>
+                                    <label for="newTime">New Time:</label>
+                                    <input type="time" id="newTime" name="newTime" required>
+                                    <br>
+                                    <button type="button" onclick="submitReschedule()">Submit</button>
+                                    <button type="button" onclick="closeModal()">Close</button>
+                                </form>
+                            </div>
+
+                            <button class="btn btn-danger" onclick="cancelAppointment({{ appointment.id }})">Cancel</button>
+                            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">No appointments found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    
+
+    <script>
+        function cancelAppointment(appointmentId) {
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+            fetch(`/admin-cancel-appointment/${appointmentId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({ 'appointment_id': appointmentId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Appointment cancelled successfully!');
+                    location.reload(); // Reload the page to update the list
+                } else {
+                    alert('Failed to cancel appointment: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+
+        function openRescheduleModal(appointmentId) {
+    document.getElementById('appointmentId').value = appointmentId;
+    document.getElementById('rescheduleModal').style.display = 'block';
+}
+
+        function closeModal() {
+            document.getElementById('rescheduleModal').style.display = 'none';
+        }
+
+        function submitReschedule() {
+            const appointmentId = document.getElementById('appointmentId').value;
+            const newDate = document.getElementById('newDate').value;
+            const newTime = document.getElementById('newTime').value;
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch(`/admin-reschedule-appointment/${appointmentId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    'new_date': newDate,
+                    'new_time': newTime
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Appointment rescheduled successfully!');
+                    closeModal();
+                    location.reload(); // Optionally reload the page or update the table dynamically
+                } else {
+                    alert('Failed to reschedule appointment: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        </script>
+        
+</body>
+</html>

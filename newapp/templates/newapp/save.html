@@ -1,0 +1,56 @@
+<div class="dashboard-item">
+    <h2>Prescriptions</h2>
+    <div class="prescriptions">
+        {% if prescriptions %}
+            {% for prescription in prescriptions %}
+            <div class="prescription-item">
+                {{prescription.description}}
+                {{prescription.price}}
+                {% if prescription.appointment.invoice %}
+                    <!-- Invoice already generated, display a message or do nothing -->
+                    <p>Invoice already generated.</p>
+                {% else %}
+                    <!-- Invoice not generated, display the "Generate invoice" link -->
+                    <a href="{% url 'generate_invoice' %}" data-prescription-id="{{ prescription.id }}" data-appointment-id="{{ prescription.appointment.id }}">Generate invoice</a>
+                    <div class="d-none hide">
+                        {{prescription.appointment.id}}
+                    </div>
+                {% endif %}
+                
+                <hr>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<div class="d-flex justify-content-between">
+    <div>
+        <div>
+            Total Amount
+        </div>
+        <div>
+            Patient Status
+        </div>
+        <div>
+            Payment Status
+        </div>
+        <div>
+            Invoice Date
+        </div>
+    </div>
+    <div class="">
+        <div>
+            ${responsive.invoice.total_amount}
+        </div>
+        <div>
+            ${responsive.invoice.patient_status}
+        </div>
+        <div>
+            ${responsive.invoice.payment_status}
+        </div>
+        <div>
+            ${responsive.invoice.invoice_date}
+        </div>
+    </div>
+</div>

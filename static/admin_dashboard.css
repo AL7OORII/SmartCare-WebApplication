@@ -1,0 +1,157 @@
+body {
+    background-color: #f8f9fa; /* Light grey background */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+    display: flex; /* Set display to flex */
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center children horizontally */
+    justify-content: center; /* Center children vertically */
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #b2d6df; /* Background color */
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+/* Flex container for dashboard sections */
+.dashboard-sections {
+    display: flex;
+    justify-content: space-between; 
+    flex-wrap: wrap; 
+    gap: 80px; 
+}
+
+/* Style for each panel within the dashboard */
+.dashboard-panel {
+    flex-basis: calc(33.333% - 40px); /* Divide the row into three columns, accounting for the gap */
+    background-color: #fff; /* Background color for the panels */
+    padding: 15px;
+    min-height: 200px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Consistent shadow as the container */
+    border-radius: 8px;
+    margin-bottom: 20px; /* Space at the bottom of each panel */
+    position: relative;
+}
+
+/* Add vertical lines between sections */
+.dashboard-panel:not(:last-child):after {
+    content: "";
+    display: block;
+    height: 100%;
+    width: 1px;
+    background: #000000; /* Light grey to match borders */
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .dashboard-panel {
+        flex-basis: calc(50% - 20px); /* On medium screens, go for 2 columns */
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-panel {
+        flex-basis: 100%; /* On small screens, stack the panels */
+    }
+}
+
+h1 {
+    color: #007bff;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #6c757d;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.logout-link {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    text-decoration: none;
+    font-weight: bold;
+    color: #007bff;
+}
+.back-to-home {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    margin-top: 10px;
+}
+
+table thead {
+    background-color: #007bff; /* Bootstrap primary color */
+    color: #ffffff;
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid #dee2e6; /* Light grey border */
+}
+
+/* Button Styles */
+.btn {
+    margin: 5px;
+}
+
+.btn-success {
+    background-color: #28a745; /* Success green */
+}
+
+.btn-danger {
+    background-color: #dc3545; /* Danger red */
+}
+
+.btn-primary {
+    background-color: #007bff; /* Primary blue */
+}
+
+.btn-secondary {
+    background-color: #6c757d; /* Secondary grey */
+}
+
+.dashboard-button {
+    background-color: #007bff; /* Darker blue for better contrast */
+    color: #ffffff;
+    padding: 10px 20px; /* Larger padding for a more prominent button */
+    margin: 10px; /* Space between buttons */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    transition: transform 0.3s, box-shadow 0.3s; /* Smooth transitions for hover effects */
+}
+
+.dashboard-button:hover {
+    transform: translateY(-2px); /* Slight lift when hovered */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
+}
+
+/* Section Styles */
+section {
+    margin-bottom: 30px;
+}
+
+.add-buttons {
+    display: flex;
+    justify-content: center; /* Align buttons in the center */
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+    text-decoration: none;
+
+}

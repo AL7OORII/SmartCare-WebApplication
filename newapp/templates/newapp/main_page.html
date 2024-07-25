@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'main_page.css' %}">
+   
+    <title>Main Page</title>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <button onclick="location.href='{% url 'about_us' %}'">About Us</button>
+            <button onclick="location.href='{% url 'contact_us' %}'">Contact Us</button>
+        </nav>
+    </header>
+    <h1>SmartCare System</h1>
+    <p style="text-shadow: 2px 2px 4px white;"><strong>You are visiting the website as a:</strong></p>
+    <div class="user-type-buttons">
+        <button onclick="location.href='{% url 'admin_login' %}'">Admin</button>
+        <button onclick="location.href='{% url 'staff_login' %}'">Staff</button>
+        <button onclick="location.href='{% url 'patient_login' %}'">Patient</button>
+    </div>
+</body>
+</html>
+

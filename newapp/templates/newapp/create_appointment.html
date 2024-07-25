@@ -1,0 +1,66 @@
+{% extends 'newapp/layout.html' %}
+{% block title %} Create Appointment {% endblock %}
+{% block content %}
+<div class="p-5">
+    <h1>Create Appointment</h1>
+    <!-- Display form errors -->
+    {% if form.errors %}
+        <ul class="messages">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <div class="alert alert-danger alert-dismissible fade show d-flex justify-content-between" role="alert">
+                        <strong>{{ error }}</strong>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        {% if form.doctor %}
+            <div class="form-group d-flex flex-column mb-3">
+                <label for="{{ form.doctor.id_for_label }}" class="col-form-label">Doctor:</label>
+                <div class="w-30">{{ form.doctor }}</div>
+            </div>
+        {% endif %}
+        {% if form.nurse %}
+            <div class="form-group d-flex flex-column mb-3">
+                <label for="{{ form.nurse.id_for_label }}" class="col-form-label">Nurse:</label>
+                <div class="w-30">{{ form.nurse }}</div>
+            </div>
+        {% endif %}
+        <div class="form-group d-flex flex-column mb-3">
+            <label for="{{ form.date.id_for_label }}" class="col-form-label">Date:</label>
+            <div class="w-30">{{ form.date }}</div>
+        </div>
+        <div class="form-group d-flex flex-column mb-3">
+            <label for="{{ form.time.id_for_label }}" class="col-form-label">Start Time:</label>
+            <div class="w-30">{{ form.start_time }}</div>
+        </div>
+        <div class="form-group d-flex flex-column mb-3">
+            <label for="{{ form.status.id_for_label }}" class="col-form-label">Status:</label>
+            <div class="w-30">{{ form.status }}</div>
+        </div>
+        {% if form.appointment_type %}
+        <div class="form-group d-flex flex-column mb-3">
+            <label for="{{ form.appointment_type.id_for_label }}" class="col-form-label">Appointment Type:</label>
+            <div class="w-30">{{ form.appointment_type }}</div>
+        </div>
+        {% endif %}
+        <div class="form-group d-flex flex-column mb-3">
+            <label for="{{ form.notes.id_for_label }}" class="col-form-label">Notes:</label>
+            <div class="">{{ form.notes }}</div>
+        </div>
+        {% if form.doctor %}
+            <button type="submit" class="btn btn-primary">Make Consultation</button>
+        {% else %}
+            <button type="submit" class="btn btn-primary">Create Appointment</button>
+        {% endif %}
+    </form> 
+</div>   
+{% endblock content %}

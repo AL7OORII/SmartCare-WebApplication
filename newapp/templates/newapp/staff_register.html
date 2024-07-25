@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Registration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Global Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Container */
+        .container {
+            max-width: 400px;
+            background-color: #bdbac0;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+        }
+
+        /* Login Header */
+        .login-header {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-header i {
+            font-size: 30px;
+            margin-right: 10px;
+        }
+
+        /* Form */
+        form {
+            margin-bottom: 20px;
+        }
+
+        /* Input Field */
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #000000;
+            border-radius: 4px;
+            outline: none;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Button */
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            background-color: #4c7aaf;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #1a1380;
+        }
+
+        /* Links */
+        a {
+            color: #555;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: #333;
+        }
+
+        .home-icon {
+            width: 40px;
+            height: 40px;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-header">
+        {% load static %}
+        <a href="{% url 'main_page' %}"><img src= "{%static 'Homeicon.png' %}" alt="Home" class="home-icon"></a>
+            <span><i class="bx bx-lock"></i></span>
+            <h2 class="login-header"><i class="fas fa-user"></i>Staff Registration</h2>
+        </div>
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <form action="{%url 'staff_register'%}" method="post">
+        <a href="{% url 'main_page' %}"></a>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Register</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!-- admin_login.html -->
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'admin_login.css' %}">
+    <title>Admin Login</title>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Admin Login</h1>
+        <form method="post" class="login-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <a href="{% url 'main_page' %}" class="back-to-home">Back to main page</a>
+</body>
+</html>
+

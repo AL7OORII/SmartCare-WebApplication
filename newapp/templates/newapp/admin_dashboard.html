@@ -1,0 +1,154 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'admin_dashboard.css' %}">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <span class="logout-link">
+        <a href="{% url 'admin_logout' %}">Logout</a>
+    </span>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        <h3>Welcome to the admin dashboard where you can manage users account creation, manage users records and appointments!</h3>
+        <br>
+         <div class="add-buttons">
+            <a href="{% url 'admin_staff_view' %}" class="btn btn-primary dashboard-button">Staff</a>
+            <a href="{% url 'admin_patient_view' %}" class="btn btn-primary dashboard-button">Patients</a>
+            <a href="{% url 'admin_appointments' %}" class="btn btn-primary dashboard-button">Appointments</a>
+            <a href="{% url 'admin_invoices' %}" class="btn btn-primary dashboard-button">Invoices</a>
+        </div>
+<br> <br>
+<!-- Container for the dashboard sections -->
+        <div class="dashboard-sections">   
+        <!-- Authorization of Signups Section -->
+        <section id="authorization-signups" class="dashboard-panel">
+            <h3>Waiting for authorization of Signup</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doctor in unapproved_doctors %}
+        <tr id="user-row-{{ doctor.id }}">
+        <td>{{ doctor.user.first_name }} {{ doctor.user.last_name }}</td>
+        <td>{{ doctor.user.email }}</td>
+        <td>Doctor</td>
+        <td>
+            <button class="btn btn-success" data-user-id="{{ doctor.id }}" data-action="approve">Approve</button>
+            <button class="btn btn-danger" data-user-id="{{ doctor.id }}" data-user-email="{{ doctor.user.email }}" data-action="reject">Reject</button>
+        </td>
+    </tr>
+    {% endfor %}
+
+    {% for nurse in unapproved_nurses %}
+    <tr id="user-row-{{ nurse.id }}">
+        <td>{{ nurse.user.first_name }} {{ nurse.user.last_name }}</td>
+        <td>{{ nurse.user.email }}</td>
+        <td>Nurse</td>
+        <td>
+            <button class="btn btn-success" data-user-id="{{ nurse.id }}" data-action="approve">Approve</button>
+            <button class="btn btn-danger" data-user-id="{{ nurse.id }}" data-user-email="{{ nurse.user.email }}" data-action="reject">Reject</button>
+        </td>
+    </tr>
+    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Recent Patients Section -->
+    <section id="recent-patients" class="dashboard-panel">
+        <h3>Current Patients</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr>
+                    <td>{{ patient.user.first_name }} {{ patient.user.last_name }}</td>
+                    <td>{{ patient.user.email }}</td>
+                    <td>
+                        <button class="btn btn-danger" data-user-id="{{ patient.id }}" data-user-email="{{ patient.user.email }}" data-action="reject">Delete Account</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </section>
+
+
+    <!-- Recent Doctors Section -->
+<section id="recent-doctors" class="dashboard-panel">
+    <h2>Current Doctors</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doctor in approved_doctors %}
+            <tr>
+                <td>{{ doctor.user.first_name }} {{ doctor.user.last_name }}</td>
+                <td>{{ doctor.user.email }}</td>
+                <td>
+                    <button class="btn btn-danger" data-user-id="{{ doctor.id }}" data-user-email="{{ doctor.user.email }}" onclick="return confirm('Are you sure?')" data-action="reject">Delete Account</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No doctors found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<!-- Recent Nurses Section -->
+<section id="recent-nurses" class="dashboard-panel">
+    <h2>Current Nurses</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for nurse in approved_nurses %}
+            <tr>
+                <td>{{ nurse.user.first_name }} {{ nurse.user.last_name }}</td>
+                <td>{{ nurse.user.email }}</td>
+                    <td>
+                        <button class="btn btn-danger" data-user-id="{{ nurse.id }}" data-user-email="{{ nurse.user.email }}" onclick="return confirm('Are you sure?')" data-action="reject">Delete Account</button>
+                    </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No nurses found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+    <a href="{% url 'main_page' %}" class="back-to-home">Back to Main Page</a>
+    <script src="{% static 'JS/admin.js' %}"></script>
+
+    
+</body>
+</html>
+
